@@ -20,7 +20,6 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  console.log('fetching Data...', event);
   event.respondWith(fetch(event.request));
   // event.respondWith(
   //   caches.match(event.request)
