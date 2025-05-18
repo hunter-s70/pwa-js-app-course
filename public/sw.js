@@ -1,7 +1,10 @@
+var CACHE_STATIC = 'static-v3';
+var CACHE_DYNAMIC = 'dynamic-v3';
+
 self.addEventListener('install', function(event) {
-  console.log('installing SW...', event);
+  console.log('[Service worker] Installing SW...', event);
   event.waitUntil(
-    caches.open('static')
+    caches.open(CACHE_STATIC)
       .then((cache) => {
         cache.addAll([
           '/',
@@ -24,15 +27,40 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('activate', function(event) {
-  console.log('activating SW...', event);
+  console.log('[Service worker] Activating SW...', event);
+  event.waitUntil(
+    caches.keys()
+      .then((cacheKeys) => {
+        return Promise.all(cacheKeys.map((key) => {
+          if (key !== CACHE_STATIC && key !== CACHE_DYNAMIC) {
+            console.log('[Service worker] Removing old cache...', key);
+            return caches.delete(key);
+          }
+        }));
+      })
+  );
   return self.clients.claim();
 });
 
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
-      .then((res) => {
-        return res ? res : fetch(event.request);
+      .then((response) => {
+        if (response) {
+          return response;
+        } else {
+          return fetch(event.request)
+            .then((res) => {
+              caches.open(CACHE_DYNAMIC)
+                .then((cache) => {
+                  cache.put(event.request, res.clone());
+                  return res;
+                })
+            })
+            .catch((err) => {
+              console.log('fetch error: ', err);
+            });
+        }
       })
   );
 });
