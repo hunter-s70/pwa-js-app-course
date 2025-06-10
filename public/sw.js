@@ -53,7 +53,7 @@ self.addEventListener('fetch', function(event) {
             .then((res) => {
               caches.open(CACHE_DYNAMIC)
                 .then((cache) => {
-                  cache.put(event.request, res.clone());
+                  // cache.put(event.request, res.clone());
                   return res;
                 })
             })

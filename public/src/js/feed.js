@@ -29,6 +29,16 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
+// Caching in offline state
+function onSaveButtonClicked(event) {
+  if ('caches' in window) {
+    caches.open('user-cache').then((cache) => {
+      cahce.add('https://httpbin.org/get');
+      cahce.add('/src/images/sf-boat.jpg');
+    });
+  }
+}
+
 function createCard() {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
@@ -50,6 +60,10 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
+  var cardSaveButton = document.createElement('button');
+  cardSaveButton.textContent = 'Save';
+  cardSaveButton.addEventListener('click', onSaveButtonClicked)
+  cardSupportingText.appendChild(cardSaveButton);
   cardWrapper.appendChild(cardSupportingText);
 
   componentHandler.upgradeElement(cardWrapper);
