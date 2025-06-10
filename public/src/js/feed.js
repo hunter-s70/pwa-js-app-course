@@ -39,6 +39,12 @@ function onSaveButtonClicked(event) {
   }
 }
 
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
 function createCard() {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
@@ -70,10 +76,30 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch('https://httpbin.org/get')
+// Strategy: Get data from cache first if exists and then update from the network
+var url = 'https://httpbin.org/get';
+var networkDataReceived = false;
+
+fetch(url)
   .then((res) => {
     return res.json();
   })
   .then((data) => {
+    networkDataReceived = true;
+    console.log('Response from web', data);
+    clearCards();
     createCard();
   });
+
+if ('caches' in window) {
+  caches.match(url)
+    .then((res) => {
+      if (res) return res.json();
+    })
+    .then((data) => {
+      if (!networkDataReceived) {
+        clearCards();
+        createCard();
+      }
+    })
+}

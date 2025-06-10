@@ -44,27 +44,43 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        } else {
-          return fetch(event.request)
-            .then((res) => {
-              caches.open(CACHE_DYNAMIC)
-                .then((cache) => {
-                  cache.put(event.request, res.clone());
-                  return res;
-                })
-            })
-            .catch((err) => {
-              console.log('fetch error: ', err);
-              return caches.open(CACHE_STATIC).then(() => {
-                return caches.match('/offline.html');
+  var url = 'https://httpbin.org/get';
+
+  if (event.request.url.indexOf(url) > -1) {
+    // Strategy: Save into cache each request and take from cache if exists, but also make a request anyway
+    event.respondWith(
+      caches.open(CACHE_DYNAMIC)
+        .then((cache) => {
+          return fetch(event.request).then((res) => {
+            cache.put(event.request, res.clone());
+            return res;
+          })
+        })
+    );
+  } else {
+    // Strategy: Old caching strategy. Take from cache.
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
+            return response;
+          } else {
+            return fetch(event.request)
+              .then((res) => {
+                caches.open(CACHE_DYNAMIC)
+                  .then((cache) => {
+                    cache.put(event.request, res.clone());
+                    return res;
+                  })
               })
-            });
-        }
-      })
-  );
+              .catch((err) => {
+                console.log('fetch error: ', err);
+                return caches.open(CACHE_STATIC).then(() => {
+                  return caches.match('/offline.html');
+                })
+              });
+          }
+        })
+    );
+  }
 });
