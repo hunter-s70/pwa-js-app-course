@@ -76,7 +76,9 @@ self.addEventListener('fetch', function(event) {
               .catch((err) => {
                 console.log('fetch error: ', err);
                 return caches.open(CACHE_STATIC).then(() => {
-                  return caches.match('/offline.html');
+                  if (event.request.headers.get('accept').includes('text/html')) {
+                    return caches.match('/offline.html');
+                  }
                 })
               });
           }
