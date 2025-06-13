@@ -1,4 +1,4 @@
-var CACHE_STATIC = 'static-v5';
+var CACHE_STATIC = 'static-v6';
 var CACHE_DYNAMIC = 'dynamic-v3';
 
 // function trimCaches(cacheName, maxItems) {
@@ -54,7 +54,7 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  var url = 'https://httpbin.org/get';
+  var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/posts.json';
 
   if (event.request.url.indexOf(url) > -1) {
     // Strategy: Save into cache each request and take from cache if exists, but also make a request anyway
@@ -72,20 +72,20 @@ self.addEventListener('fetch', function(event) {
     // Strategy: Old caching strategy. Take from cache.
     event.respondWith(
       caches.match(event.request)
-        .then((response) => {
-          if (response) {
-            return response;
+        .then((cachedData) => {
+          if (cachedData) {
+            return cachedData;
           } else {
             return fetch(event.request)
               .then((res) => {
                 caches.open(CACHE_DYNAMIC)
                   .then((cache) => {
-                    cache.put(event.request, res.clone());
+                    cache.put(event.request.url, res.clone());
                     return res;
                   })
               })
               .catch((err) => {
-                console.log('fetch error: ', err);
+                console.log('[Service worker] Fetch error: ', err);
                 return caches.open(CACHE_STATIC).then(() => {
                   if (event.request.headers.get('accept').includes('text/html')) {
                     return caches.match('/offline.html');

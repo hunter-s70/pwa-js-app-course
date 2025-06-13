@@ -45,26 +45,26 @@ function clearCards() {
   }
 }
 
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
 
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url(${data.image})`;
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
 
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitleTextElement.style.color = '#fff';
   cardTitle.appendChild(cardTitleTextElement);
 
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   // var cardSaveButton = document.createElement('button');
   // cardSaveButton.textContent = 'Save';
@@ -76,8 +76,15 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
+function updateUI(data) {
+  clearCards();
+  Object.keys(data).forEach((card) => {
+    createCard(data[card]);
+  })
+}
+
 // Strategy: Get data from cache first if exists and then update from the network
-var url = 'https://httpbin.org/get';
+var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/posts.json';
 var networkDataReceived = false;
 
 fetch(url)
@@ -87,8 +94,7 @@ fetch(url)
   .then((data) => {
     networkDataReceived = true;
     console.log('Response from web', data);
-    clearCards();
-    createCard();
+    updateUI(data);
   });
 
 if ('caches' in window) {
@@ -98,8 +104,8 @@ if ('caches' in window) {
     })
     .then((data) => {
       if (!networkDataReceived) {
-        clearCards();
-        createCard();
+        console.log('Set from cache', data);
+        updateUI(data);
       }
     })
 }
