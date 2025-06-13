@@ -29,3 +29,11 @@
   display: block;
   margin: 10px auto;
 }
+
+#shared-moments {
+  text-align: center;
+}
+
+.shared-moment-card.mdl-card {
+  margin: 10px auto;
+}
