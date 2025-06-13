@@ -1,6 +1,16 @@
 var CACHE_STATIC = 'static-v5';
 var CACHE_DYNAMIC = 'dynamic-v3';
 
+function trimCaches(cacheName, maxItems) {
+  caches.open(cacheName).then((cache) => {
+    return cache.keys().then((keys) => {
+      if (keys.length > maxItems) {
+        cache.delete(keys[0]).then(trimCaches(cacheName, maxItems));
+      }
+    });
+  })
+}
+
 self.addEventListener('install', function(event) {
   console.log('[Service worker] Installing SW...', event);
   event.waitUntil(
@@ -52,6 +62,7 @@ self.addEventListener('fetch', function(event) {
       caches.open(CACHE_DYNAMIC)
         .then((cache) => {
           return fetch(event.request).then((res) => {
+            trimCaches(CACHE_DYNAMIC, 10);
             cache.put(event.request, res.clone());
             return res;
           })
