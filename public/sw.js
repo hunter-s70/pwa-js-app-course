@@ -3,15 +3,22 @@ importScripts('/src/js/idb.js');
 var CACHE_STATIC = 'static-v6';
 var CACHE_DYNAMIC = 'dynamic-v3';
 
-// function trimCaches(cacheName, maxItems) {
-//   caches.open(cacheName).then((cache) => {
-//     return cache.keys().then((keys) => {
-//       if (keys.length > maxItems) {
-//         cache.delete(keys[0]).then(trimCaches(cacheName, maxItems));
-//       }
-//     });
-//   })
-// }
+var POSTS_STORE = 'posts';
+var dbPromise = idb.open('posts-store', 1, function(db) {
+  if (!db.objectStoreNames.contains(POSTS_STORE)) {
+    db.createObjectStore(POSTS_STORE, { keyPath: 'id' });
+  }
+});
+
+function trimCaches(cacheName, maxItems) {
+  caches.open(cacheName).then((cache) => {
+    return cache.keys().then((keys) => {
+      if (keys.length > maxItems) {
+        cache.delete(keys[0]).then(trimCaches(cacheName, maxItems));
+      }
+    });
+  })
+}
 
 self.addEventListener('install', function(event) {
   console.log('[Service worker] Installing SW...', event);
@@ -62,14 +69,21 @@ self.addEventListener('fetch', function(event) {
   if (event.request.url.indexOf(url) > -1) {
     // Strategy: Save into cache each request and take from cache if exists, but also make a request anyway
     event.respondWith(
-      caches.open(CACHE_DYNAMIC)
-        .then((cache) => {
-          return fetch(event.request).then((res) => {
-            // trimCaches(CACHE_DYNAMIC, 10);
-            cache.put(event.request, res.clone());
-            return res;
+      fetch(event.request).then((res) => {
+        var clonedRes = res.clone();
+        clonedRes.json().then((data) => {
+          Object.keys(data).forEach((card) => {
+            dbPromise.then((db) => {
+              // Open IndexedDB transaction
+              var tx = db.transaction(POSTS_STORE, 'readwrite');
+              var store = tx.objectStore(POSTS_STORE);
+              store.put(data[card]);
+              return tx.complete;
+            })
           })
         })
+        return res;
+      })
     );
   } else {
     // Strategy: Old caching strategy. Take from cache.
