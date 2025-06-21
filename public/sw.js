@@ -1,14 +1,8 @@
 importScripts('/src/js/idb.js');
+importScripts('/src/js/dbUtils.js');
 
 var CACHE_STATIC = 'static-v6';
 var CACHE_DYNAMIC = 'dynamic-v3';
-
-var POSTS_STORE = 'posts';
-var dbPromise = idb.open('posts-store', 1, function(db) {
-  if (!db.objectStoreNames.contains(POSTS_STORE)) {
-    db.createObjectStore(POSTS_STORE, { keyPath: 'id' });
-  }
-});
 
 function trimCaches(cacheName, maxItems) {
   caches.open(cacheName).then((cache) => {
@@ -73,13 +67,7 @@ self.addEventListener('fetch', function(event) {
         var clonedRes = res.clone();
         clonedRes.json().then((data) => {
           Object.keys(data).forEach((card) => {
-            dbPromise.then((db) => {
-              // Open IndexedDB transaction
-              var tx = db.transaction(POSTS_STORE, 'readwrite');
-              var store = tx.objectStore(POSTS_STORE);
-              store.put(data[card]);
-              return tx.complete;
-            })
+            writeData(POSTS_STORE, data[card]);
           })
         })
         return res;
