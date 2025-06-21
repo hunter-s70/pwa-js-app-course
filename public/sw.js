@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtils.js');
 
-var CACHE_STATIC = 'static-v7';
-var CACHE_DYNAMIC = 'dynamic-v4';
+var CACHE_STATIC = 'static-v8';
+var CACHE_DYNAMIC = 'dynamic-v5';
 
 function trimCaches(cacheName, maxItems) {
   caches.open(cacheName).then((cache) => {
@@ -66,12 +66,17 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
       fetch(event.request).then((res) => {
         var clonedRes = res.clone();
-        clonedRes.json().then((data) => {
+
+        // Clear all storage. Some items can be deleted on the server
+        clearAllData(POSTS_STORE).then(() => {
+          return clonedRes.json();
+        }).then((data) => {
           Object.keys(data).forEach((card) => {
             // Open IndexedDB store and put data
             writeData(POSTS_STORE, data[card]);
           })
         })
+
         return res;
       })
     );
