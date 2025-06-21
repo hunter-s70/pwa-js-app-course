@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtils.js');
 
-var CACHE_STATIC = 'static-v6';
-var CACHE_DYNAMIC = 'dynamic-v3';
+var CACHE_STATIC = 'static-v7';
+var CACHE_DYNAMIC = 'dynamic-v4';
 
 function trimCaches(cacheName, maxItems) {
   caches.open(cacheName).then((cache) => {
@@ -29,6 +29,7 @@ self.addEventListener('install', function(event) {
           '/src/js/feed.js',
           '/src/js/fetch.js',
           '/src/js/idb.js',
+          '/src/js/dbUtils.js',
           '/src/js/promise.js',
           '/src/js/material.min.js',
           '/src/images/main-image.jpg',
@@ -67,6 +68,7 @@ self.addEventListener('fetch', function(event) {
         var clonedRes = res.clone();
         clonedRes.json().then((data) => {
           Object.keys(data).forEach((card) => {
+            // Open IndexedDB store and put data
             writeData(POSTS_STORE, data[card]);
           })
         })

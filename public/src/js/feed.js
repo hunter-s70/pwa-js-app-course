@@ -97,15 +97,11 @@ fetch(url)
     updateUI(data);
   });
 
-if ('caches' in window) {
-  caches.match(url)
-    .then((res) => {
-      if (res) return res.json();
-    })
-    .then((data) => {
-      if (!networkDataReceived) {
-        console.log('Set from cache', data);
-        updateUI(data);
-      }
-    })
+if ('indexedDB' in window) {
+  readAllData(POSTS_STORE).then((data) => {
+    if (!networkDataReceived) {
+      console.log('Set from indexedDB', data);
+      updateUI(data);
+    }
+  });
 }
