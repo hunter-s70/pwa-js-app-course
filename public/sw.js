@@ -1,3 +1,5 @@
+importScripts('/src/js/idb.js');
+
 var CACHE_STATIC = 'static-v6';
 var CACHE_DYNAMIC = 'dynamic-v3';
 
@@ -25,6 +27,7 @@ self.addEventListener('install', function(event) {
           '/src/js/app.js',
           '/src/js/feed.js',
           '/src/js/fetch.js',
+          '/src/js/idb.js',
           '/src/js/promise.js',
           '/src/js/material.min.js',
           '/src/images/main-image.jpg',
