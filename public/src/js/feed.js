@@ -2,9 +2,10 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
 
 function openCreatePostModal() {
-  createPostArea.style.transfrom = 'translateY(0)';
+  createPostArea.style.transform = 'translateY(0)';
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -22,7 +23,7 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transfrom = 'translateY(100vh)';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -105,3 +106,56 @@ if ('indexedDB' in window) {
     }
   });
 }
+
+function sendData() {
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: form.title.value,
+      location: form.location.value,
+    }),
+  }).then(() => {
+    updateUI();
+  });
+}
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  if (!form.title.value.trim() || !form.location.value.trim()) {
+    alert('Please, enter a valid data!');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then((sw) => {
+      var post = {
+        id: new Date().toISOString(),
+        title: form.title.value,
+        location: form.location.value,
+      };
+
+      writeData(SYNC_POSTS_STORE, post)
+        .then(() => {
+          sw.sync.register('sync-new-post');
+        })
+        .then(() => {
+          const snackbarContainer = document.getElementById('#confirmation-toast');
+          const data = {message: 'Your Post has been synced successfully!'};
+          snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  } else {
+    sendData();
+  }
+});

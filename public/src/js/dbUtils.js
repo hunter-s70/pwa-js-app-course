@@ -1,8 +1,12 @@
 var POSTS_STORE = 'posts';
+var SYNC_POSTS_STORE = 'sync-posts';
 
 var dbPromise = idb.open('posts-store', 1, function(db) {
   if (!db.objectStoreNames.contains(POSTS_STORE)) {
     db.createObjectStore(POSTS_STORE, { keyPath: 'id' });
+  }
+  if (!db.objectStoreNames.contains(SYNC_POSTS_STORE)) {
+    db.createObjectStore(SYNC_POSTS_STORE, { keyPath: 'id' });
   }
 });
 
