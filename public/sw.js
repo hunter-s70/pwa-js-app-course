@@ -109,3 +109,41 @@ self.addEventListener('fetch', function(event) {
     );
   }
 });
+
+self.addEventListener('sync', function(event) {
+  var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/posts.json';
+
+  console.log('[Service worker] Background syncing: ', event);
+
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service worker] Syncing new Posts.');
+
+    event.waitUntil(
+      readAllData(SYNC_POSTS_STORE).then((data) => {
+        for (var post of data) {
+
+          // Make sure that ".write": true inside the Firebase Realtime Database
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+              id: post.id,
+              title: post.title,
+              location: post.location,
+              image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
+            }),
+          }).then((res) => {
+            if (res.ok) {
+              deleteItem(SYNC_POSTS_STORE, post.id);
+            }
+          }).catch((err) => {
+            console.log('Error while sending data', err);
+          });
+        }
+      })
+    );
+  }
+});

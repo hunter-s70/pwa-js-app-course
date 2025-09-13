@@ -108,6 +108,7 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
+  // Make sure that ".write": true inside the Firebase Realtime Database
   fetch(url, {
     method: 'POST',
     headers: {
@@ -118,6 +119,7 @@ function sendData() {
       id: new Date().toISOString(),
       title: form.title.value,
       location: form.location.value,
+      image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
     }),
   }).then(() => {
     updateUI();
@@ -144,10 +146,10 @@ form.addEventListener('submit', function(event) {
 
       writeData(SYNC_POSTS_STORE, post)
         .then(() => {
-          sw.sync.register('sync-new-post');
+          sw.sync.register('sync-new-posts');
         })
         .then(() => {
-          const snackbarContainer = document.getElementById('#confirmation-toast');
+          const snackbarContainer = document.querySelector('#confirmation-toast');
           const data = {message: 'Your Post has been synced successfully!'};
           snackbarContainer.MaterialSnackbar.showSnackbar(data);
         })
