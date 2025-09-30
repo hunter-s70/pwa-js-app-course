@@ -22,6 +22,13 @@ window.addEventListener('beforeinstallprompt', function(event) {
   return false;
 });
 
+function displayConfirmNotification() {
+  var options = {
+    body: 'You successfully subscribed to our Notification service!',
+  };
+  new Notification('Successfully subscribed!', options);
+}
+
 function askForNotificationPermission() {
   Notification.requestPermission(function(result) {
     console.log('User choice', result);
@@ -30,7 +37,7 @@ function askForNotificationPermission() {
       console.log('No notification permission granted!');
     } else {
       // Handle push notifications
-      console.log('Notification permission granted!');
+      displayConfirmNotification();
     }
   });
 }
