@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtils.js');
 
-var CACHE_STATIC = 'static-v8';
+var CACHE_STATIC = 'static-v9';
 var CACHE_DYNAMIC = 'dynamic-v5';
 
 function trimCaches(cacheName, maxItems) {
