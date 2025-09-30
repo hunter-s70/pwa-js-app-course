@@ -23,10 +23,23 @@ window.addEventListener('beforeinstallprompt', function(event) {
 });
 
 function displayConfirmNotification() {
-  var options = {
-    body: 'You successfully subscribed to our Notification service!',
-  };
-  new Notification('Successfully subscribed!', options);
+  // Using Notifications from Service Worker
+  if ('serviceWorker' in navigator) {
+    var options = {
+      body: 'You successfully subscribed to our Notification service!',
+    };
+
+    navigator.serviceWorker.ready
+      .then((swreg) => {
+        swreg.showNotification('Successfully subscribed (from SW)!', options)
+      });
+  }
+
+  // Using Notification API
+  // var options = {
+  //   body: 'You successfully subscribed to our Notification service!',
+  // };
+  // new Notification('Successfully subscribed!', options);
 }
 
 function askForNotificationPermission() {
@@ -43,6 +56,7 @@ function askForNotificationPermission() {
 }
 
 if ('Notification' in window) {
+  // Show notification permission buttons if Notification API supported
   for (var i = 0; i < enableNotificationsButtons.length; i++) {
     enableNotificationsButtons[i].style.display = 'inline-block';
     enableNotificationsButtons[i].addEventListener('click', askForNotificationPermission);
