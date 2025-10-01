@@ -148,6 +148,8 @@ self.addEventListener('sync', function(event) {
   }
 });
 
+// Handle notifications
+
 self.addEventListener('notificationclick', function(event) {
   const action = event.action;
   const notification = event.notification;
@@ -161,4 +163,8 @@ self.addEventListener('notificationclick', function(event) {
     console.log(action);
     notification.close();
   }
+});
+
+self.addEventListener('notificationclose', function(event) {
+  console.log('[Service worker] Notification was closed', event);
 });
