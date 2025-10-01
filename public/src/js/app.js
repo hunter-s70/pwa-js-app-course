@@ -27,11 +27,17 @@ function displayConfirmNotification() {
   if ('serviceWorker' in navigator) {
     var options = {
       body: 'You successfully subscribed to our Notification service!',
+      icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-us',
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png',
     };
 
     navigator.serviceWorker.ready
-      .then((swreg) => {
-        swreg.showNotification('Successfully subscribed (from SW)!', options)
+      .then((sw) => {
+        sw.showNotification('Successfully subscribed (from SW)!', options)
       });
   }
 
