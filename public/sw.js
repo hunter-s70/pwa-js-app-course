@@ -147,3 +147,18 @@ self.addEventListener('sync', function(event) {
     );
   }
 });
+
+self.addEventListener('notificationclick', function(event) {
+  const action = event.action;
+  const notification = event.notification;
+
+  console.log('[Service worker] Notification clicked: ', notification);
+
+  if (action === 'confirm') {
+    console.log('[Service worker] Confirm action was chosen');
+    notification.close();
+  } else {
+    console.log(action);
+    notification.close();
+  }
+});
