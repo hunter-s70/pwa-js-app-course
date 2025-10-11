@@ -1,6 +1,8 @@
 var deferredPrompt;
 var enableNotificationsButtons = document.querySelectorAll('.enable-notifications');
 
+var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/subscriptions.json';
+
 if (!window.Promise) {
   window.Promise = Promise;
 }
@@ -62,6 +64,47 @@ function displayConfirmNotification() {
   // new Notification('Successfully subscribed!', options);
 }
 
+// Configure push notification subscription
+function configurePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  var reg;
+  navigator.serviceWorker.ready
+    .then((sw) => {
+      reg = sw;
+      return sw.pushManager.getSubscription();
+    })
+    .then((sub) => {
+      if (sub === null) {
+        // Create a new subscription
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'UniquePublicKeyHere', // VAPID
+        });
+      } else {
+        // Use an existing subscription
+      }
+    })
+    .then((newSub) => {
+      return fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(newSub),
+      })
+    })
+    .then((res) => {
+      if (res.ok) displayConfirmNotification();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
 function askForNotificationPermission() {
   Notification.requestPermission(function(result) {
     console.log('User choice', result);
@@ -70,12 +113,15 @@ function askForNotificationPermission() {
       console.log('No notification permission granted!');
     } else {
       // Handle push notifications
-      displayConfirmNotification();
+      // displayConfirmNotification();
+
+      // Cloud functions required. Uncompleted
+      configurePushSub();
     }
   });
 }
 
-if ('Notification' in window) {
+if ('Notification' in window && 'serviceWorker' in navigator) {
   // Show notification permission buttons if Notification API supported
   for (var i = 0; i < enableNotificationsButtons.length; i++) {
     enableNotificationsButtons[i].style.display = 'inline-block';
