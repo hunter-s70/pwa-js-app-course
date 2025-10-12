@@ -1,8 +1,6 @@
 var deferredPrompt;
 var enableNotificationsButtons = document.querySelectorAll('.enable-notifications');
 
-var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/subscriptions.json';
-
 if (!window.Promise) {
   window.Promise = Promise;
 }
@@ -71,6 +69,7 @@ function configurePushSub() {
   }
 
   var reg;
+  var url = 'https://pwagram-be351-default-rtdb.europe-west1.firebasedatabase.app/subscriptions.json';
   navigator.serviceWorker.ready
     .then((sw) => {
       reg = sw;
@@ -79,12 +78,16 @@ function configurePushSub() {
     .then((sub) => {
       if (sub === null) {
         // Create a new subscription
+        var vapidPublicKey = 'BO_XVLjrtdLTdKmo6VZo-ZrivVP3oILH4f13PRAvs5hox2y-RESPPRVGM6Fg5agZbjiSjGWJ6Z8KJJu4OcXM0-8';
+        var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+
         return reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: 'UniquePublicKeyHere', // VAPID
+          applicationServerKey: convertedVapidPublicKey,
         });
       } else {
         // Use an existing subscription
+        // sub.unsubscribe();
       }
     })
     .then((newSub) => {
