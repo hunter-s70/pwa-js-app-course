@@ -149,7 +149,6 @@ self.addEventListener('sync', function(event) {
 });
 
 // Handle notifications
-
 self.addEventListener('notificationclick', function(event) {
   const action = event.action;
   const notification = event.notification;
@@ -167,4 +166,24 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('notificationclose', function(event) {
   console.log('[Service worker] Notification was closed', event);
+});
+
+// Listen push notifications from the server
+self.addEventListener('push', function(event) {
+  var data = {
+    title: 'New!',
+    content: 'Something new happened!'
+  };
+
+  console.log('[Service worker] Push notification received', event);
+
+  if (event.data) {
+    data = JSON.parse(event.data.text())
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.content,
+    })
+  )
 });
