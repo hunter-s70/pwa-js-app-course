@@ -160,7 +160,23 @@ self.addEventListener('notificationclick', function(event) {
     notification.close();
   } else {
     console.log(action);
-    notification.close();
+
+    // Open app by click on event
+    event.waitUntil(
+      clients.matchAll()
+        .then((clientsList) => {
+          const client = clientsList.find((c) => c.visibilityState === 'visible');
+
+          if (client !== undefined) {
+            client.navigate('http://localhost:8080');
+            client.focus();
+          } else {
+            clients.openWindow('http://localhost:8080');
+          }
+
+          notification.close();
+        })
+    );
   }
 });
 
