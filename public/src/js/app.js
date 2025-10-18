@@ -49,13 +49,14 @@ function displayConfirmNotification() {
       ],
     };
 
+    // Using ServiceWorker to show notification
     navigator.serviceWorker.ready
       .then((sw) => {
         sw.showNotification('Successfully subscribed (from SW)!', options)
       });
   }
 
-  // Using Notification API
+  // Using Notification API to show notification
   // var options = {
   //   body: 'You successfully subscribed to our Notification service!',
   // };
@@ -116,10 +117,10 @@ function askForNotificationPermission() {
       console.log('No notification permission granted!');
     } else {
       // Handle push notifications
-      // displayConfirmNotification();
+      displayConfirmNotification();
 
       // Cloud functions required. Uncompleted
-      configurePushSub();
+      // configurePushSub();
     }
   });
 }

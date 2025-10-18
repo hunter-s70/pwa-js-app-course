@@ -152,6 +152,7 @@ self.addEventListener('sync', function(event) {
 self.addEventListener('notificationclick', function(event) {
   const action = event.action;
   const notification = event.notification;
+  const defaultAppUrl = 'http://localhost:8080/help';
 
   console.log('[Service worker] Notification clicked: ', notification);
 
@@ -159,7 +160,7 @@ self.addEventListener('notificationclick', function(event) {
     console.log('[Service worker] Confirm action was chosen');
     notification.close();
   } else {
-    console.log(action);
+    console.log('[Service worker] Action was chosen: ', action);
 
     // Open app by click on event
     event.waitUntil(
@@ -168,10 +169,10 @@ self.addEventListener('notificationclick', function(event) {
           const client = clientsList.find((c) => c.visibilityState === 'visible');
 
           if (client !== undefined) {
-            client.navigate('http://localhost:8080');
+            client.navigate(notification.data?.openUrl || defaultAppUrl);
             client.focus();
           } else {
-            clients.openWindow('http://localhost:8080');
+            clients.openWindow(notification.data?.openUrl || defaultAppUrl);
           }
 
           notification.close();
@@ -185,10 +186,13 @@ self.addEventListener('notificationclose', function(event) {
 });
 
 // Listen push notifications from the server
+// Require Cloud function. Is not working now
 self.addEventListener('push', function(event) {
+  // Event fallback
   var data = {
     title: 'New!',
-    content: 'Something new happened!'
+    content: 'Something new happened!',
+    openUrl: '/',
   };
 
   console.log('[Service worker] Push notification received', event);
@@ -200,6 +204,9 @@ self.addEventListener('push', function(event) {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.content,
+      data: {
+        url: data.openUrl, // Get needed url from the server and pass into notification click handler
+      }
     })
   )
 });
