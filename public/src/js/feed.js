@@ -3,6 +3,34 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
+var videoPlayer = document.querySelector('#player');
+var canvasElement = document.querySelector('#canvas');
+var captureButton = document.querySelector('#capture-btn');
+var imagePicker = document.querySelector('#image-picker');
+var imagePickerArea = document.querySelector('#pick-image');
+
+// Setup media devices Polyfills
+function initializeMedia() {
+  if (!('mediaDevices' in navigator)) {
+    navigator.mediaDevices = {};
+  }
+
+  if (!('getUserMedia' in navigator.mediaDevices)) {
+    navigator.mediaDevices.getUserMedia = function (constrains) {
+      var getUserMedia = navigaror.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+      if (!getUserMedia) {
+        return Promise.reject(new Error('getUserMedia is not implemented!'));
+      }
+
+      return new Promise(function (resolve, reject) {
+        getUserMedia.call(navigator, constrains, resolve, reject);
+      });
+    };
+  }
+}
 
 function openCreatePostModal() {
   createPostArea.style.transform = 'translateY(0)';
