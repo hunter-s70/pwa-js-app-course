@@ -121,6 +121,16 @@ self.addEventListener('sync', function(event) {
     event.waitUntil(
       readAllData(SYNC_POSTS_STORE).then((data) => {
         for (var post of data) {
+          var postData = new FormData();
+          postData.append('id', post.id);
+          postData.append('titile', post.title);
+          postData.append('location', post.location);
+          postData.append('file', post.picture, post.id + '.png');
+
+          // fetch(url, {
+          //   method: 'POST',
+          //   body: postData,
+          // })
 
           // Make sure that ".write": true inside the Firebase Realtime Database
           fetch(url, {
@@ -135,7 +145,8 @@ self.addEventListener('sync', function(event) {
               location: post.location,
               image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
             }),
-          }).then((res) => {
+          })
+          .then((res) => {
             if (res.ok) {
               deleteItem(SYNC_POSTS_STORE, post.id);
             }

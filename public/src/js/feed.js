@@ -10,6 +10,7 @@ var canvasElement = document.querySelector('#canvas');
 var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
+var picture;
 
 // Setup media devices Polyfills
 function initializeMedia() {
@@ -52,6 +53,9 @@ captureButton.addEventListener('click', function (event) {
   videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
     track.stop();
   });
+
+  // Convert image to a Blob
+  picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
 function openCreatePostModal() {
@@ -162,6 +166,18 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
+  var id = new Date().toISOString();
+  var postData = new FormData();
+  postData.append('id', id);
+  postData.append('titile', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('file', picture, id + '.png');
+
+  // fetch(url, {
+  //   method: 'POST',
+  //   body: postData,
+  // })
+
   // Make sure that ".write": true inside the Firebase Realtime Database
   fetch(url, {
     method: 'POST',
@@ -175,7 +191,8 @@ function sendData() {
       location: form.location.value,
       image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
     }),
-  }).then(() => {
+  })
+  .then(() => {
     updateUI();
   });
 }
@@ -196,6 +213,7 @@ form.addEventListener('submit', function(event) {
         id: new Date().toISOString(),
         title: form.title.value,
         location: form.location.value,
+        picture: picture,
       };
 
       writeData(SYNC_POSTS_STORE, post)
