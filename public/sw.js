@@ -26,6 +26,7 @@ self.addEventListener('install', function(event) {
           '/src/css/app.css',
           '/src/css/feed.css',
           '/src/js/app.js',
+          '/src/js/utils.js',
           '/src/js/feed.js',
           '/src/js/fetch.js',
           '/src/js/idb.js',
