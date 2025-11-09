@@ -13,13 +13,14 @@ var imagePickerArea = document.querySelector('#pick-image');
 var picture;
 var locationBtn = document.querySelector('#location-btn');
 var locationLoader = document.querySelector('#location-loader');
-var fetchedLocation;
+var fetchedLocation = { lat: 0, lng: 0 };
 
 // Capture geolocation
 locationBtn.addEventListener('click', function() {
   if (!('geolocation' in navigator)) {
     return;
   }
+  var sawAlert = false;
 
   locationBtn.style.display = 'none';
   locationLoader.style.display = 'block';
@@ -34,8 +35,13 @@ locationBtn.addEventListener('click', function() {
     locationBtn.style.display = 'inline';
     locationLoader.style.display = 'none';
     console.log(err);
-    alert('Couldn`t fetch location, please enter manually!');
-    fetchedLocation = { lat: null, lng: null };
+
+    if (sawAlert) {
+      sawAlert = true;
+      alert('Couldn`t fetch location, please enter manually!');
+    }
+
+    fetchedLocation = { lat: 0, lng: 0 };
   }, {
     timeout: 7000,
   });
@@ -100,7 +106,10 @@ imagePicker.addEventListener('change', function (event) {
 });
 
 function openCreatePostModal() {
-  createPostArea.style.transform = 'translateY(0)';
+  setTimeout(function () {
+    createPostArea.style.transform = 'translateY(0)';
+  }, 1);
+
   initializeMedia();
   initializeLocation();
 
@@ -120,12 +129,23 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = 'translateY(100vh)';
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
   locationBtn.style.display = 'inline';
   locationLoader.style.display = 'none';
+  captureButton.style.display = 'inline';
+
+  // Stop recording
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
+      track.stop();
+    });
+  }
+
+  setTimeout(function () {
+    createPostArea.style.transform = 'translateY(100vh)';
+  }, 1);
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
