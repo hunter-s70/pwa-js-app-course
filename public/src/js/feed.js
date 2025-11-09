@@ -11,6 +11,42 @@ var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
 var picture;
+var locationBtn = document.querySelector('#location-btn');
+var locationLoader = document.querySelector('#location-loader');
+var fetchedLocation;
+
+// Capture geolocation
+locationBtn.addEventListener('click', function() {
+  if (!('geolocation' in navigator)) {
+    return;
+  }
+
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'block';
+
+  navigator.geolocation.getCurrentPosition(function(position) {
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+    fetchedLocation = { lat: position.coords.latitude, lng: 0 };
+    locationInput.value = 'On Earth';
+    document.querySelector('#manual-location').classList.add('is-focused');
+  }, function(err) {
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+    console.log(err);
+    alert('Couldn`t fetch location, please enter manually!');
+    fetchedLocation = { lat: null, lng: null };
+  }, {
+    timeout: 7000,
+  });
+});
+
+// Setup geolocation
+function initializeLocation() {
+  if (!('geolocation' in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
 
 // Setup media devices Polyfills
 function initializeMedia() {
@@ -66,6 +102,7 @@ imagePicker.addEventListener('change', function (event) {
 function openCreatePostModal() {
   createPostArea.style.transform = 'translateY(0)';
   initializeMedia();
+  initializeLocation();
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -87,6 +124,8 @@ function closeCreatePostModal() {
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  locationLoader.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -176,6 +215,8 @@ function sendData() {
   postData.append('id', id);
   postData.append('titile', titleInput.value);
   postData.append('location', locationInput.value);
+  postData.append('rawLocationLat', fetchedLocation.lat);
+  postData.append('rawLocationLng', fetchedLocation.lng);
   postData.append('file', picture, id + '.png');
 
   // fetch(url, {
@@ -193,7 +234,9 @@ function sendData() {
     body: JSON.stringify({
       id: new Date().toISOString(),
       title: form.title.value,
-      location: form.location.value,
+      location: form.location.value, // Text input field. Place description.
+      rawLocationLat: fetchedLocation.lat,
+      rawLocationLng: fetchedLocation.lng,
       image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
     }),
   })
@@ -217,7 +260,8 @@ form.addEventListener('submit', function(event) {
       var post = {
         id: new Date().toISOString(),
         title: form.title.value,
-        location: form.location.value,
+        location: form.location.value, // Text input field. Place description.
+        rawLocation: fetchedLocation,
         picture: picture,
       };
 

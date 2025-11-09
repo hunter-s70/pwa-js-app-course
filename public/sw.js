@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtils.js');
 
-var CACHE_STATIC = 'static-v9';
-var CACHE_DYNAMIC = 'dynamic-v5';
+var CACHE_STATIC = 'static-v10';
+var CACHE_DYNAMIC = 'dynamic-v6';
 
 function trimCaches(cacheName, maxItems) {
   caches.open(cacheName).then((cache) => {
@@ -126,6 +126,8 @@ self.addEventListener('sync', function(event) {
           postData.append('id', post.id);
           postData.append('titile', post.title);
           postData.append('location', post.location);
+          postData.append('rawLocationLat', post.rawLocation.lat);
+          postData.append('rawLocationLng', post.rawLocation.lng);
           postData.append('file', post.picture, post.id + '.png');
 
           // fetch(url, {
@@ -144,6 +146,8 @@ self.addEventListener('sync', function(event) {
               id: post.id,
               title: post.title,
               location: post.location,
+              rawLocationLat: post.rawLocation.lat,
+              rawLocationLng: post.rawLocation.lng,
               image: 'https://ogletree.com/app/uploads/Locations/Images/WashingtonDC_GettyImages-922906670-scaled.jpg',
             }),
           })
